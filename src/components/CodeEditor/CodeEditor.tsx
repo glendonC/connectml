@@ -57,7 +57,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ pipeline, onClose }) => 
         initial={{ scale: 0.95 }}
         animate={{ scale: 1 }}
         exit={{ scale: 0.95 }}
-        className="w-full max-w-[90vw] h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden flex flex-col"
+        className="w-full max-w-[90vw] h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden flex flex-col"
       >
         <EditorHeader
           code={code}

@@ -15,7 +15,8 @@
     "agent": {
       "name": "DataCleanerGPT",
       "role": "Data Preprocessing Expert",
-      "quote": "Clean data is my jam! Let me handle those messy sensor readings."
+      "quote": "Clean data is my jam! Let me handle those messy sensor readings.",
+      "why_chosen": "Essential for neural networks and algorithms sensitive to feature scales. Standardization ensures all features contribute equally to the model's learning process."
     }
   },
   {
@@ -33,7 +34,8 @@
     "agent": {
       "name": "NormalizerGPT",
       "role": "Data Scaling Specialist",
-      "quote": "Let me squeeze those values into a nice, bounded range!"
+      "quote": "Let me squeeze those values into a nice, bounded range!",
+      "why_chosen": "Perfect for data with known bounds or when preserving zero values is important. Particularly useful for image processing and neural network output layers."
     }
   },
   {
@@ -51,7 +53,8 @@
     "agent": {
       "name": "AnomalyHunterGPT",
       "role": "Outlier Detection Expert",
-      "quote": "I've got a keen eye for data that doesn't belong!"
+      "quote": "I've got a keen eye for data that doesn't belong!",
+      "why_chosen": "Critical for maintaining model robustness by identifying and removing statistical anomalies. Helps prevent model bias from extreme values and improves overall prediction reliability."
     }
   },
   {
@@ -69,7 +72,8 @@
     "agent": {
       "name": "TimeKeeperGPT",
       "role": "Temporal Alignment Specialist",
-      "quote": "Time waits for no one, but I'll make sure your data stays in sync!"
+      "quote": "Time waits for no one, but I'll make sure your data stays in sync!",
+      "why_chosen": "Crucial for multi-sensor systems where data streams need precise temporal alignment. Ensures accurate correlation analysis and prevents temporal bias in model training."
     }
   },
   {
@@ -87,7 +91,8 @@
     "agent": {
       "name": "ModelArchitectGPT",
       "role": "Neural Architecture Specialist",
-      "quote": "Time series data? Leave it to my transformer architecture!"
+      "quote": "Time series data? Leave it to my transformer architecture!",
+      "why_chosen": "Selected for its superior ability to capture long-range dependencies in sequential data. The self-attention mechanism excels at modeling complex temporal relationships."
     }
   },
   {
@@ -105,7 +110,8 @@
     "agent": {
       "name": "OutputOptimizerGPT",
       "role": "Prediction Refinement Specialist",
-      "quote": "Let me format those predictions for easy integration!"
+      "quote": "Let me format those predictions for easy integration!",
+      "why_chosen": "Enables seamless integration with downstream services through standardized JSON output. Adds crucial metadata and timestamps for proper prediction tracking."
     }
   },
   {
@@ -123,7 +129,8 @@
     "agent": {
       "name": "FeatureEngineerGPT",
       "role": "Feature Engineering Specialist",
-      "quote": "Let's distill those features down to their essence!"
+      "quote": "Let's distill those features down to their essence!",
+      "why_chosen": "Optimal for reducing high-dimensional data while preserving maximum variance. Helps combat the curse of dimensionality and speeds up downstream model training."
     }
   },
   {
@@ -141,7 +148,8 @@
     "agent": {
       "name": "QualityControlGPT",
       "role": "Data Quality Guardian",
-      "quote": "Ensuring your data is pristine and ready for analysis!"
+      "quote": "Ensuring your data is pristine and ready for analysis!",
+      "why_chosen": "Prevents data quality issues by enforcing strict schema validation. Catches malformed inputs early in the pipeline to ensure downstream reliability."
     }
   },
   {
@@ -159,7 +167,8 @@
     "agent": {
       "name": "PerformanceMonitorGPT",
       "role": "Model Performance Analyst",
-      "quote": "Keeping a vigilant eye on your model's health and stability."
+      "quote": "Keeping a vigilant eye on your model's health and stability.",
+      "why_chosen": "Essential for production ML systems to detect performance degradation early. Monitors statistical drift in both feature distributions and model outputs."
     }
   },
   {
@@ -177,7 +186,8 @@
     "agent": {
       "name": "InsightfulAnalystGPT",
       "role": "Model Interpretation Expert",
-      "quote": "Unlocking the secrets behind your model's decisions."
+      "quote": "Unlocking the secrets behind your model's decisions.",
+      "why_chosen": "Provides transparent, theoretically-grounded explanations for model predictions. Essential for building trust and meeting regulatory requirements."
     }
   },
   {
@@ -195,7 +205,8 @@
     "agent": {
       "name": "DataResilienceGPT",
       "role": "Outlier-Resistant Scaling Specialist",
-      "quote": "Making your data robust against the slings and arrows of outliers!"
+      "quote": "Making your data robust against the slings and arrows of outliers!",
+      "why_chosen": "Ideal for datasets with outliers that can't be removed. Uses quartile statistics instead of mean/variance for more robust feature scaling."
     }
   }
 ] 

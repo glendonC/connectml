@@ -10,6 +10,7 @@ interface SearchBarProps {
   mode: 'fast' | 'precise';  // This is for clarification mode
   aiMode: AIMode;
   setAIMode: (mode: AIMode) => void;
+  onFileUpload: (files: FileList) => void;
 }
 
 export function SearchBar({ 
@@ -18,7 +19,8 @@ export function SearchBar({
   onKeyPress, 
   mode, 
   aiMode, 
-  setAIMode 
+  setAIMode,
+  onFileUpload
 }: SearchBarProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -34,7 +36,7 @@ export function SearchBar({
   }, []);
 
   return (
-    <div className="relative search-shadow rounded-full bg-white transition-all">
+    <div className="search-shadow rounded-full bg-white transition-all">
       <div className="flex items-center px-6 py-3">
         <Search className="w-5 h-5 text-gray-400 mr-4" />
         <input
@@ -93,7 +95,13 @@ export function SearchBar({
           
           <label className="p-2 hover:bg-gray-100 rounded-full cursor-pointer transition-colors">
             <Upload className="w-5 h-5 text-gray-500" />
-            <input type="file" className="hidden" accept=".csv,.json" />
+            <input 
+              type="file" 
+              className="hidden" 
+              accept=".py,.ipynb,.csv,.json"
+              multiple
+              onChange={(e) => e.target.files && onFileUpload(e.target.files)}
+            />
           </label>
         </div>
       </div>

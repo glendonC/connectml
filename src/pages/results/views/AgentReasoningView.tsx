@@ -87,7 +87,9 @@ const getAgentColor = (type: string) => {
 const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const reasoning = component.agentReasoning;
-  const impactTags = getImpactTags(reasoning.performanceImpact);
+  
+  // Add null check for reasoning and performanceImpact
+  const impactTags = reasoning?.performanceImpact ? getImpactTags(reasoning.performanceImpact) : [];
 
   const getAgentIcon = (type: string) => {
     switch (type) {
@@ -137,15 +139,15 @@ const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
               {/* Agent Identity */}
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-['Google_Sans'] text-lg text-gray-900">
-                  {reasoning.agentName}
+                  {reasoning?.agentName || component.name}
                 </h3>
                 <span className="px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">
-                  {reasoning.role}
+                  {reasoning?.role || 'Component'}
                 </span>
               </div>
 
               {/* Quote */}
-              <p className="text-gray-600 italic">"{reasoning.quote}"</p>
+              <p className="text-gray-600 italic">"{reasoning?.quote || component.description}"</p>
             </div>
 
             <motion.div
@@ -174,7 +176,7 @@ const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
                     <Brain className="w-4 h-4 text-blue-500" />
                     Component Purpose
                   </h4>
-                  <p className="text-gray-600">{reasoning.description}</p>
+                  <p className="text-gray-600">{reasoning?.description || component.description}</p>
                 </div>
 
                 {/* Why This Component */}
@@ -183,7 +185,7 @@ const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
                     <HelpCircle className="w-4 h-4 text-purple-500" />
                     Why This Choice?
                   </h4>
-                  <p className="text-gray-600">{reasoning.why}</p>
+                  <p className="text-gray-600">{reasoning?.why || `Added to enhance pipeline capabilities with ${component.name.toLowerCase()}`}</p>
                 </div>
 
                 {/* Performance Impact */}
@@ -207,13 +209,13 @@ const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
 
                 {/* Technical Details */}
                 <div className="space-y-4">
-                  {reasoning.note && (
+                  {reasoning?.note && (
                     <div className="bg-blue-50 rounded-xl p-4 text-sm text-gray-700">
                       <strong className="font-['Google_Sans']">Optimization Note:</strong> {reasoning.note}
                     </div>
                   )}
 
-                  {reasoning.codeSnippet && (
+                  {reasoning?.codeSnippet && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-sm font-['Google_Sans'] text-gray-900 flex items-center gap-2">
@@ -229,7 +231,7 @@ const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
                         </a>
                       </div>
                       <pre className="bg-gray-900 rounded-lg p-4 text-sm text-gray-300 font-mono overflow-x-auto">
-                        {reasoning.codeSnippet}
+                        {reasoning?.codeSnippet || component.codeSnippet || 'No code snippet available'}
                       </pre>
                     </div>
                   )}
@@ -250,36 +252,7 @@ const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
 
 export function AgentReasoningView({ pipeline }: AgentReasoningViewProps) {
   return (
-    <div className="max-w-4xl mx-auto px-4 pb-12">
-      {/* Overview */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-100">
-        <div className="flex items-start gap-4">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Zap className="w-5 h-5 text-blue-600" />
-          </div>
-          <div>
-            <h2 className="text-xl font-['Google_Sans'] text-gray-900 mb-4">
-              Pipeline Overview
-            </h2>
-            <div className="space-y-3">
-              {pipeline.components.map((component, index) => (
-                <div key={component.id} className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
-                    {index + 1}
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-gray-700">
-                      <span className="font-medium text-gray-900">{component.name}:</span>{' '}
-                      {component.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="max-w-4xl mx-auto px-4 pt-8 pb-12">
       {/* Agent Cards */}
       <div className="space-y-8">
         {pipeline.components.map((component, index) => (
