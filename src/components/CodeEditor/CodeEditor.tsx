@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { EditorHeader } from './components/EditorHeader';
 import { CodePane } from './components/CodePane';
 import { RecommendationsPanel } from './components/RecommendationsPanel';
@@ -77,7 +77,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ pipeline, onClose }) => 
         />
         
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 h-full">
+          <div className={`flex-1 h-full ${showRecommendations ? 'w-3/4' : 'w-full'}`}>
             <CodePane
               code={code}
               language={language}
@@ -87,15 +87,22 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ pipeline, onClose }) => 
             />
           </div>
           
-          {showRecommendations && (
-            <div className="w-80 border-l border-gray-200">
-              <RecommendationsPanel
-                code={code}
-                isLoading={isLoading || isRefactoring}
-                onRefactor={handleRefactorCode}
-              />
-            </div>
-          )}
+          <AnimatePresence>
+            {showRecommendations && (
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 400, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                className="w-[400px] border-l border-gray-200 overflow-y-auto"
+              >
+                <RecommendationsPanel
+                  code={code}
+                  isLoading={isLoading || isRefactoring}
+                  onRefactor={handleRefactorCode}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </motion.div>

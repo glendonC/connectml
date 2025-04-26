@@ -14,12 +14,7 @@ export function RecommendationsPanel({ code, isLoading, onRefactor }: Recommenda
   const recommendations = useRecommendations(code);
 
   return (
-    <motion.div
-      initial={{ width: 0, opacity: 0 }}
-      animate={{ width: 400, opacity: 1 }}
-      exit={{ width: 0, opacity: 0 }}
-      className="border-l border-gray-200 overflow-y-auto"
-    >
+    <div className="h-full overflow-y-auto">
       <div className="p-6 space-y-6">
         {/* Refactoring Options */}
         <div>
@@ -145,6 +140,6 @@ export function RecommendationsPanel({ code, isLoading, onRefactor }: Recommenda
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

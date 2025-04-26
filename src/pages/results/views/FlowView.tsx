@@ -150,30 +150,36 @@ export function FlowView({ pipeline }: FlowViewProps) {
   // Get unique component types from the pipeline
   const componentTypes = Array.from(new Set(pipeline.components.map(c => c.type)));
 
-  // Initialize nodes
-  const initialNodes: Node[] = pipeline.components.map((component, index) => ({
-    id: component.id,
-    type: 'custom',
-    position: { x: index * 400, y: 100 },
-    data: component,
-  }));
+  // Update nodes and edges when pipeline changes
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // Initialize edges
-  const initialEdges: Edge[] = pipeline.components.slice(0, -1).map((component, index) => ({
-    id: `e${component.id}-${pipeline.components[index + 1].id}`,
-    source: component.id,
-    target: pipeline.components[index + 1].id,
-    type: 'smoothstep',
-    animated: false,
-    style: { stroke: '#94a3b8' },
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      color: '#94a3b8',
-    },
-  }));
+  React.useEffect(() => {
+    // Initialize nodes with updated positions
+    const newNodes: Node[] = pipeline.components.map((component, index) => ({
+      id: component.id,
+      type: 'custom',
+      position: { x: index * 400, y: 100 },
+      data: component,
+    }));
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    // Initialize edges between components
+    const newEdges: Edge[] = pipeline.components.slice(0, -1).map((component, index) => ({
+      id: `e${component.id}-${pipeline.components[index + 1].id}`,
+      source: component.id,
+      target: pipeline.components[index + 1].id,
+      type: 'smoothstep',
+      animated: false,
+      style: { stroke: '#94a3b8' },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: '#94a3b8',
+      },
+    }));
+
+    setNodes(newNodes);
+    setEdges(newEdges);
+  }, [pipeline.components, setNodes, setEdges]);
 
   const getNodeColor = (type: string) => {
     switch (type) {

@@ -14,6 +14,14 @@ export function ThreeDView({ pipeline, hideLabels = false }: ThreeDViewProps) {
   // Get unique component types from the pipeline
   const componentTypes = Array.from(new Set(pipeline.components.map(c => c.type)));
 
+  // Memoize component positions to prevent unnecessary recalculations
+  const componentPositions = React.useMemo(() => {
+    return pipeline.components.map((component, index) => {
+      const x = (index - (pipeline.components.length - 1) / 2) * 6;
+      return { id: component.id, x };
+    });
+  }, [pipeline.components]);
+
   const getIconByType = (type: string) => {
     switch (type.toLowerCase()) {
       case 'preprocessing': return <Database className="w-4 h-4 text-blue-600" />;
@@ -84,26 +92,23 @@ export function ThreeDView({ pipeline, hideLabels = false }: ThreeDViewProps) {
           <Environment preset="sunset" />
           
           <group position={[0, 0, 0]}>
-            {pipeline.components.map((component, index) => {
-              const x = (index - (pipeline.components.length - 1) / 2) * 6;
-              return (
-                <Float
-                  key={component.id}
-                  speed={1.5} 
-                  rotationIntensity={0.2} 
-                  floatIntensity={0.5}
-                  floatingRange={[0, 0.5]}
-                >
-                  <ModelNode
-                    type={component.type}
-                    position={[x, 0, 0]}
-                    isActive={false}
-                    data={component}
-                    hideLabels={hideLabels}
-                  />
-                </Float>
-              );
-            })}
+            {pipeline.components.map((component, index) => (
+              <Float
+                key={component.id}
+                speed={1.5} 
+                rotationIntensity={0.2} 
+                floatIntensity={0.5}
+                floatingRange={[0, 0.5]}
+              >
+                <ModelNode
+                  type={component.type}
+                  position={[componentPositions[index].x, 0, 0]}
+                  isActive={false}
+                  data={component}
+                  hideLabels={hideLabels}
+                />
+              </Float>
+            ))}
           </group>
         </Suspense>
 

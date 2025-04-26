@@ -54,7 +54,46 @@ export function ComponentCatalog({ pipeline, onAddComponents, onClose }: Compone
     });
   };
 
-  const handlePreviewConfirm = () => {
+  const handlePreviewConfirm = (validatedComponents?: PipelineComponent[]) => {
+    // If we have validated components, use them directly
+    if (validatedComponents) {
+      // Ensure all components have the required agentReasoning properties
+      const processedComponents = validatedComponents.map(component => {
+        // If the component already has agentReasoning, keep it
+        if (component.agentReasoning) {
+          return component;
+        }
+        
+        // Otherwise, find the original component to get its agent info
+        const originalComponent = selectedComponents.find(c => c.id === component.id);
+        
+        // Create a new component with the required properties
+        return {
+          ...component,
+          agentReasoning: {
+            agentName: originalComponent?.agent.name || 'AI Agent',
+            role: originalComponent?.agent.role || 'ML Engineer',
+            quote: originalComponent?.agent.quote || 'This component enhances the pipeline.',
+            componentTitle: component.name,
+            description: component.description,
+            why: `Added to enhance pipeline capabilities with ${component.name.toLowerCase()}`,
+            performanceImpact: {
+              accuracy: '+0%',
+              latency: '0ms',
+              reliability: '+0%'
+            }
+          }
+        };
+      });
+      
+      onAddComponents(processedComponents);
+      setSelectedComponents([]);
+      setShowPreview(false);
+      onClose();
+      return;
+    }
+
+    // Otherwise, create new components as before
     const newComponents: PipelineComponent[] = selectedComponents.map((component, index) => {
       const mappedType = component.type === 'feature' || component.type === 'transformation' || 
                         component.type === 'monitoring' || component.type === 'explainability' 
@@ -106,7 +145,9 @@ export function ComponentCatalog({ pipeline, onAddComponents, onClose }: Compone
       };
     });
 
+    // Add components and reset state
     onAddComponents(newComponents);
+    setSelectedComponents([]);
     setShowPreview(false);
     onClose();
   };

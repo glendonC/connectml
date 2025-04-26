@@ -3,7 +3,7 @@ import { Domain } from '../../App';
 import { Header } from '../../components/Header';
 import { RobotAssistant } from '../../components/RobotAssistant';
 import { Footer } from '../../components/Footer';
-import { SearchBar } from './components/SearchBar';
+import { SearchBar, AIMode } from './components/SearchBar';
 import { DomainPills, domains } from './components/DomainPills';
 import { ClarificationChat } from './components/ClarificationChat';
 import { useClarification } from './hooks/useClarification';
@@ -14,9 +14,11 @@ interface LandingPageProps {
   mode: 'fast' | 'precise';
   setMode: (mode: 'fast' | 'precise') => void;
   onGenerate: () => void;
+  aiMode: AIMode;
+  setAIMode: (mode: AIMode) => void;
 }
 
-export function LandingPage({ prompt, setPrompt, mode, setMode, onGenerate }: LandingPageProps) {
+export function LandingPage({ prompt, setPrompt, mode, setMode, onGenerate, aiMode, setAIMode }: LandingPageProps) {
   const [showReadyMessage, setShowReadyMessage] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
   
@@ -53,9 +55,17 @@ export function LandingPage({ prompt, setPrompt, mode, setMode, onGenerate }: La
   const handleSubmit = async () => {
     if (!prompt.trim()) return;
 
-    if (mode === 'precise' && selectedDomain) {
-      await fetchClarificationQuestions(prompt, selectedDomain);
+    if (aiMode === 'quick') {
+      // For quick mode, use the existing clarification flow
+      if (mode === 'precise' && selectedDomain) {
+        await fetchClarificationQuestions(prompt, selectedDomain);
+      } else {
+        onGenerate();
+      }
     } else {
+      // For Agentic mode, we'll implement this later
+      // For now, just show a console message
+      console.log('Agentic mode selected - to be implemented');
       onGenerate();
     }
   };
@@ -87,6 +97,9 @@ export function LandingPage({ prompt, setPrompt, mode, setMode, onGenerate }: La
                 prompt={prompt}
                 setPrompt={setPrompt}
                 onKeyPress={handleKeyPress}
+                mode={mode}
+                aiMode={aiMode}
+                setAIMode={setAIMode}
               />
 
               <ClarificationChat

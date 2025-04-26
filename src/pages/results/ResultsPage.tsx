@@ -16,22 +16,69 @@ interface ResultsPageProps {
   onBack: () => void;
 }
 
-export function ResultsPage({ pipeline, onBack }: ResultsPageProps) {
+export function ResultsPage({ pipeline: initialPipeline, onBack }: ResultsPageProps) {
   const [activeView, setActiveView] = useState<ViewType>('flow');
   const [hoveredTab, setHoveredTab] = useState<ViewType | null>(null);
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
   const [showCatalog, setShowCatalog] = useState(false);
-  const { setPipeline } = usePipeline();
+  const { pipeline, setPipeline } = usePipeline();
+
+  // Initialize pipeline in context if not already set
+  React.useEffect(() => {
+    if (!pipeline) {
+      setPipeline(initialPipeline);
+    }
+  }, [initialPipeline, pipeline, setPipeline]);
 
   const handleAddComponents = (newComponents: PipelineComponent[]) => {
-    setPipeline({
-      ...pipeline,
-      components: [...pipeline.components, ...newComponents]
+    if (!pipeline) return;
+    
+    // Ensure all components have the required agentReasoning properties
+    const processedComponents = newComponents.map(component => {
+      // If the component already has agentReasoning, keep it
+      if (component.agentReasoning) {
+        return component;
+      }
+      
+      // Otherwise, create a default agentReasoning
+      return {
+        ...component,
+        agentReasoning: {
+          agentName: 'AI Agent',
+          role: 'ML Engineer',
+          quote: 'This component enhances the pipeline.',
+          componentTitle: component.name,
+          description: component.description,
+          why: `Added to enhance pipeline capabilities with ${component.name.toLowerCase()}`,
+          performanceImpact: {
+            accuracy: '+0%',
+            latency: '0ms',
+            reliability: '+0%'
+          }
+        }
+      };
     });
+    
+    // Create a new pipeline object with updated components
+    const updatedPipeline = {
+      ...pipeline,
+      components: processedComponents,
+      // Update other pipeline metrics as needed
+      totalModels: processedComponents.filter(c => c.type === 'model').length,
+    };
+    
+    // Update the pipeline in context
+    setPipeline(updatedPipeline);
+    
+    // Close the catalog
+    setShowCatalog(false);
   };
 
   const isModalOpen = showCodeEditor || showExplanation || showCatalog;
+
+  // Use pipeline from context instead of prop
+  if (!pipeline) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">

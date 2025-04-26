@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Pipeline } from '../App';
 
 interface PipelineContextType {
@@ -9,10 +9,19 @@ interface PipelineContextType {
 const PipelineContext = createContext<PipelineContextType | undefined>(undefined);
 
 export function PipelineProvider({ children }: { children: React.ReactNode }) {
-  const [pipeline, setPipeline] = useState<Pipeline | null>(null);
+  const [pipeline, setPipelineState] = useState<Pipeline | null>(null);
+
+  const setPipeline = useCallback((newPipeline: Pipeline | null) => {
+    setPipelineState(newPipeline);
+  }, []);
+
+  const value = React.useMemo(() => ({
+    pipeline,
+    setPipeline
+  }), [pipeline, setPipeline]);
 
   return (
-    <PipelineContext.Provider value={{ pipeline, setPipeline }}>
+    <PipelineContext.Provider value={value}>
       {children}
     </PipelineContext.Provider>
   );

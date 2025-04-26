@@ -7,7 +7,7 @@ interface PipelinePreviewProps {
   pipeline: Pipeline;
   selectedComponents: PipelineComponent[];
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (validatedComponents?: PipelineComponent[]) => void;
 }
 
 interface ValidationResult {
@@ -66,6 +66,10 @@ export function PipelinePreview({ pipeline, selectedComponents, onClose, onConfi
 
       const data = await response.json();
       
+      if (data.suggested_order) {
+        setComponents(data.suggested_order);
+      }
+      
       setValidationResult({
         isValid: data.valid,
         warnings: [],
@@ -74,10 +78,6 @@ export function PipelinePreview({ pipeline, selectedComponents, onClose, onConfi
         suggestedOrder: data.suggested_order,
         restructuringNotes: data.restructuring_notes,
       });
-
-      if (data.suggested_order) {
-        setComponents(data.suggested_order);
-      }
     } catch (error) {
       setValidationResult({
         isValid: false,
@@ -330,7 +330,7 @@ export function PipelinePreview({ pipeline, selectedComponents, onClose, onConfi
               {isValidating ? 'Validating...' : 'Validate Pipeline'}
             </button>
             <button
-              onClick={onConfirm}
+              onClick={() => onConfirm(validationResult.suggestedOrder || undefined)}
               disabled={!validationResult.isValid}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 validationResult.isValid

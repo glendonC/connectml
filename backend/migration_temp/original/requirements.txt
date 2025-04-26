@@ -1,0 +1,9 @@
+langgraph>=0.0.15
+langsmith>=0.0.69
+langchain-anthropic>=0.0.1
+python-dotenv>=0.19.0
+tavily-python
+langchain_community
+fastapi>=0.104.0
+uvicorn>=0.23.2
+pydantic>=2.4.2 
