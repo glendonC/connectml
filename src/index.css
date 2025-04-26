@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-gray-800 font-['Roboto'];
+  }
+  
+  input::placeholder {
+    @apply text-gray-500/60;
+  }
+
+  input {
+    @apply outline-none font-['Google_Sans'];
+  }
+}
+
+.search-shadow {
+  box-shadow: 0 1px 6px rgba(32,33,36,.28);
+}
+
+.search-shadow:hover {
+  box-shadow: 0 1px 6px rgba(32,33,36,.45);
+}
+
+.search-shadow:focus-within {
+  box-shadow: 0 1px 12px rgba(32,33,36,.35);
+}
+
+.button-shadow {
+  box-shadow: 0 1px 3px rgba(32,33,36,.15);
+}
+
+.button-shadow:hover {
+  box-shadow: 0 1px 3px rgba(32,33,36,.35);
+}
+
+.mode-toggle {
+  box-shadow: 0 2px 5px rgba(32,33,36,.12);
+}
+
+.mode-toggle:hover {
+  box-shadow: 0 2px 8px rgba(32,33,36,.20);
+}
+
+@keyframes gentle-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.9) translateX(5px); }
+  100% { opacity: 1; transform: scale(1) translateX(0); }
+}
+
+@keyframes bounce-in {
+  0% { opacity: 0; transform: scale(0.8); }
+  60% { transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pop-in {
+  animation: pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-wave {
+  animation: wave 1.5s ease-in-out infinite;
+}
+
+/* Add blur backdrop support */
+@supports (backdrop-filter: blur(4px)) {
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+  .backdrop-blur-md {
+    backdrop-filter: blur(8px);
+  }
+  .backdrop-blur-lg {
+    backdrop-filter: blur(12px);
+  }
+}
