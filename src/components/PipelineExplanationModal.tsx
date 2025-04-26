@@ -10,7 +10,8 @@ import {
   Code,
   Zap,
   Info,
-  CheckCircle2
+  CheckCircle2,
+  Bot
 } from 'lucide-react';
 
 interface PipelineExplanationModalProps {
@@ -63,8 +64,22 @@ export function PipelineExplanationModal({ pipeline, onClose }: PipelineExplanat
                   <Info className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-['Google_Sans'] text-gray-900 mb-2">Overview</h3>
-                  <p className="text-gray-700">{pipeline.description}</p>
+                  <h3 className="font-['Google_Sans'] text-gray-900 mb-4">Overview</h3>
+                  <div className="space-y-3">
+                    {pipeline.components.map((component, index) => (
+                      <div key={component.id} className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
+                          {index + 1}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-gray-700">
+                            <span className="font-medium text-gray-900">{component.name}:</span>{' '}
+                            {component.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

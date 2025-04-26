@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code, Settings2, X } from 'lucide-react';
+import { Code, Settings2, X, Wand2, FileCode } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { FrameworkSelector } from './FrameworkSelector';
 import { RefactorButton } from './RefactorButton';
@@ -19,6 +19,9 @@ interface EditorHeaderProps {
   setShowRecommendations: (show: boolean) => void;
   onRefactor: (option: RefactorOption, customPrompt?: string) => void;
   onClose: () => void;
+  useAIGeneration: boolean;
+  setUseAIGeneration: (use: boolean) => void;
+  error: string | null;
 }
 
 export function EditorHeader({
@@ -32,7 +35,10 @@ export function EditorHeader({
   showRecommendations,
   setShowRecommendations,
   onRefactor,
-  onClose
+  onClose,
+  useAIGeneration,
+  setUseAIGeneration,
+  error,
 }: EditorHeaderProps) {
   const [showSettings, setShowSettings] = useState(false);
 
@@ -43,7 +49,21 @@ export function EditorHeader({
           <div className="p-2 bg-blue-100 rounded-lg">
             <Code className="w-5 h-5 text-blue-600" />
           </div>
-          <h2 className="text-xl font-['Google_Sans'] text-gray-900">Generated Code</h2>
+          <div>
+            <h2 className="text-xl font-['Google_Sans'] text-gray-900">Generated Code</h2>
+            {!useAIGeneration && (
+              <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                <FileCode className="w-4 h-4" />
+                Using template-based generation
+              </div>
+            )}
+            {error && useAIGeneration && (
+              <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                <FileCode className="w-4 h-4" />
+                Fallback to template-based generation
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -54,6 +74,18 @@ export function EditorHeader({
             }`}
           >
             <Settings2 className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={() => setUseAIGeneration(!useAIGeneration)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+              useAIGeneration 
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Wand2 className="w-4 h-4" />
+            <span className="text-sm">AI Generation</span>
           </button>
 
           <RefactorButton code={code} onRefactor={onRefactor} />

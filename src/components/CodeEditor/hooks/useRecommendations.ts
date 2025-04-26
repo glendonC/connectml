@@ -1,63 +1,48 @@
-import { Pipeline } from '../../../App';
-import { companyIcons } from '../utils/constants';
+import { useState, useEffect } from 'react';
 import { HardwareRecommendation, PlatformRecommendation } from '../types';
 
-export function useRecommendations(pipeline: Pipeline) {
-  const totalParams = pipeline.components
-    .filter(c => c.type === 'model')
-    .reduce((sum, c) => sum + (c.parameters || 0), 0);
+interface Recommendations {
+  requiresTraining: boolean;
+  hardware: HardwareRecommendation[];
+  platforms: PlatformRecommendation[];
+}
 
-  const isLargeModel = totalParams > 100000000; // 100M params
-  const requiresGPU = isLargeModel || pipeline.estimatedLatency > 100;
+export function useRecommendations(code: string): Recommendations {
+  const [recommendations, setRecommendations] = useState<Recommendations>({
+    requiresTraining: false,
+    hardware: [
+      {
+        type: 'gpu',
+        name: 'NVIDIA T4',
+        description: 'Good balance of performance and cost for training and inference',
+        cost: '$0.35/hour',
+        provider: 'Google Cloud',
+        icon: '/icons/gcp.svg'
+      }
+    ],
+    platforms: [
+      {
+        name: 'Google Colab Pro',
+        description: 'Cloud-based Jupyter notebooks with free GPU access',
+        url: 'https://colab.research.google.com',
+        icon: '/icons/colab.svg',
+        features: ['Free GPUs', 'Collaborative', 'Easy Setup']
+      }
+    ]
+  });
 
-  const hardware: HardwareRecommendation[] = requiresGPU ? [
-    {
-      type: 'gpu',
-      name: 'NVIDIA A10G',
-      description: 'Excellent for both training and inference',
-      cost: '$0.60/hour',
-      provider: 'Available on Brev.dev',
-      icon: companyIcons.nvidia
-    },
-    {
-      type: 'gpu',
-      name: 'NVIDIA A100',
-      description: 'Best for large-scale training and parallel workloads',
-      cost: '$2.50/hour',
-      provider: 'Available on Brev.dev',
-      icon: companyIcons.nvidia
-    }
-  ] : [
-    {
-      type: 'cpu',
-      name: 'High-Performance CPU',
-      description: 'Sufficient for inference and small models',
-      cost: '$0.10/hour',
-      provider: 'Available on Brev.dev',
-      icon: companyIcons.brevdev
-    }
-  ];
+  useEffect(() => {
+    // TODO: Analyze code and update recommendations
+    // For now, just check if the code includes training-related keywords
+    const hasTraining = code.toLowerCase().includes('train') || 
+                       code.toLowerCase().includes('fit') ||
+                       code.toLowerCase().includes('epoch');
+    
+    setRecommendations(prev => ({
+      ...prev,
+      requiresTraining: hasTraining
+    }));
+  }, [code]);
 
-  const platforms: PlatformRecommendation[] = [
-    {
-      name: 'Brev.dev',
-      description: 'One-click ML development environment with GPU access',
-      url: 'https://brev.dev',
-      icon: companyIcons.brevdev,
-      features: ['Instant GPU access', 'Pre-configured ML environments', 'Collaborative features']
-    },
-    {
-      name: 'Hugging Face',
-      description: 'Model hub and deployment platform',
-      url: 'https://huggingface.co',
-      icon: 'https://huggingface.co/favicon.ico',
-      features: [
-        'Model repository',
-        'Easy model sharing',
-        'Inference APIs'
-      ]
-    }
-  ];
-
-  return { hardware, platforms, requiresTraining: isLargeModel };
+  return recommendations;
 }

@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Float } from '@react-three/drei';
 import { Pipeline } from '../../../App';
 import { ModelNode } from '../../../components/3d/ModelNode';
-import { Database, Sparkles, Code } from 'lucide-react';
+import { Database, Sparkles, Code, GitBranch, ArrowLeftRight, Activity, LineChart } from 'lucide-react';
 
 interface ThreeDViewProps {
   pipeline: Pipeline;
@@ -15,20 +15,28 @@ export function ThreeDView({ pipeline, hideLabels = false }: ThreeDViewProps) {
   const componentTypes = Array.from(new Set(pipeline.components.map(c => c.type)));
 
   const getIconByType = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case 'preprocessing': return <Database className="w-4 h-4 text-blue-600" />;
       case 'model': return <Sparkles className="w-4 h-4 text-purple-600" />;
       case 'postprocessing': return <Code className="w-4 h-4 text-green-600" />;
+      case 'feature': return <GitBranch className="w-4 h-4 text-orange-600" />;
+      case 'transformation': return <ArrowLeftRight className="w-4 h-4 text-rose-600" />;
+      case 'monitoring': return <Activity className="w-4 h-4 text-cyan-600" />;
+      case 'explainability': return <LineChart className="w-4 h-4 text-yellow-600" />;
       default: return <Database className="w-4 h-4 text-gray-600" />;
     }
   };
 
   const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'preprocessing': return 'bg-blue-100';
-      case 'model': return 'bg-purple-100';
-      case 'postprocessing': return 'bg-green-100';
-      default: return 'bg-gray-100';
+    switch (type.toLowerCase()) {
+      case 'preprocessing': return 'bg-blue-100/80';
+      case 'model': return 'bg-purple-100/80';
+      case 'postprocessing': return 'bg-green-100/80';
+      case 'feature': return 'bg-orange-100/80';
+      case 'transformation': return 'bg-rose-100/80';
+      case 'monitoring': return 'bg-cyan-100/80';
+      case 'explainability': return 'bg-yellow-100/80';
+      default: return 'bg-gray-100/80';
     }
   };
 
@@ -40,7 +48,7 @@ export function ThreeDView({ pipeline, hideLabels = false }: ThreeDViewProps) {
         <div className="space-y-2">
           {componentTypes.map(type => (
             <div key={type} className="flex items-center gap-2">
-              <div className={`p-1.5 rounded-lg ${getTypeColor(type)}`}>
+              <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${getTypeColor(type)}`}>
                 {getIconByType(type)}
               </div>
               <span className="text-sm text-gray-600">

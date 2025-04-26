@@ -18,9 +18,8 @@ export function LanguageSelector({ language, onLanguageChange }: LanguageSelecto
         onChange={(e) => onLanguageChange(e.target.value as Language)}
         className="rounded-md border border-gray-300 py-1 px-2 text-sm focus:border-blue-500 focus:outline-none"
       >
-        <option value="javascript">JavaScript</option>
-        <option value="typescript">TypeScript</option>
         <option value="python">Python</option>
+        <option value="json">JSON</option>
       </select>
     </div>
   );

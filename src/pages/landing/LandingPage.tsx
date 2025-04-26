@@ -5,7 +5,7 @@ import { RobotAssistant } from '../../components/RobotAssistant';
 import { Footer } from '../../components/Footer';
 import { SearchBar } from './components/SearchBar';
 import { DomainPills, domains } from './components/DomainPills';
-import { ClarificationChat, clarificationQuestions } from './components/ClarificationChat';
+import { ClarificationChat } from './components/ClarificationChat';
 import { useClarification } from './hooks/useClarification';
 
 interface LandingPageProps {
@@ -26,7 +26,10 @@ export function LandingPage({ prompt, setPrompt, mode, setMode, onGenerate }: La
     clarificationAnswers,
     currentQuestionIndex,
     isTyping,
-    simulateTyping,
+    questions,
+    context,
+    error,
+    fetchClarificationQuestions,
     handleClarificationAnswer,
     handleNextQuestion,
     resetClarification
@@ -47,12 +50,11 @@ export function LandingPage({ prompt, setPrompt, mode, setMode, onGenerate }: La
     resetClarification();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!prompt.trim()) return;
 
     if (mode === 'precise' && selectedDomain) {
-      setShowClarification(true);
-      simulateTyping();
+      await fetchClarificationQuestions(prompt, selectedDomain);
     } else {
       onGenerate();
     }
@@ -64,7 +66,7 @@ export function LandingPage({ prompt, setPrompt, mode, setMode, onGenerate }: La
     }
   };
 
-  const currentQuestion = selectedDomain && clarificationQuestions[selectedDomain][currentQuestionIndex];
+  const currentQuestion = questions[currentQuestionIndex];
 
   return (
     <>
@@ -96,6 +98,9 @@ export function LandingPage({ prompt, setPrompt, mode, setMode, onGenerate }: La
                 clarificationAnswers={clarificationAnswers}
                 onAnswerSubmit={handleClarificationAnswer}
                 onNextQuestion={() => handleNextQuestion(selectedDomain!, onGenerate)}
+                context={context}
+                totalQuestions={questions.length}
+                error={error}
               />
             </div>
 

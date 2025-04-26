@@ -71,6 +71,19 @@ const getImpactTags = (impact: { accuracy: string; latency: string; reliability:
   return tags;
 };
 
+const getAgentColor = (type: string) => {
+  switch (type) {
+    case 'preprocessing': return 'bg-blue-50 text-blue-600';
+    case 'model': return 'bg-purple-50 text-purple-600';
+    case 'postprocessing': return 'bg-green-50 text-green-600';
+    case 'feature': return 'bg-orange-50 text-orange-600';
+    case 'transformation': return 'bg-rose-50 text-rose-600';
+    case 'monitoring': return 'bg-cyan-50 text-cyan-600';
+    case 'explainability': return 'bg-yellow-50 text-yellow-600';
+    default: return 'bg-gray-50 text-gray-600';
+  }
+};
+
 const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const reasoning = component.agentReasoning;
@@ -85,15 +98,6 @@ const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
     }
   };
 
-  const getAgentColor = (type: string) => {
-    switch (type) {
-      case 'preprocessing': return 'bg-blue-50 text-blue-600 border-blue-100';
-      case 'model': return 'bg-purple-50 text-purple-600 border-purple-100';
-      case 'postprocessing': return 'bg-green-50 text-green-600 border-green-100';
-      default: return 'bg-gray-50 text-gray-600 border-gray-100';
-    }
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -104,15 +108,14 @@ const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
       <div className={`rounded-xl border transition-all ${
         isExpanded ? 'bg-white shadow-lg' : 'bg-white/50 hover:bg-white hover:shadow-md'
       }`}>
-        {/* Component Name Banner */}
-        <div className={`px-6 py-2 border-b ${getAgentColor(component.type)} rounded-t-xl`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {getAgentIcon(component.type)}
-              <span className="font-['Google_Sans'] text-sm">Component: {component.name}</span>
-            </div>
-            <span className="text-sm opacity-75">{component.type}</span>
+        {/* Component Type Banner */}
+        <div className="flex items-center justify-between px-6 py-2 border-b">
+          <div className="flex items-center gap-2">
+            <span className="font-['Google_Sans'] text-sm">Component: {component.name}</span>
           </div>
+          <span className={`text-sm ${getAgentColor(component.type)}`}>
+            {component.type.toLowerCase()}
+          </span>
         </div>
 
         {/* Agent Header */}
@@ -255,12 +258,24 @@ export function AgentReasoningView({ pipeline }: AgentReasoningViewProps) {
             <Zap className="w-5 h-5 text-blue-600" />
           </div>
           <div>
-            <h2 className="text-xl font-['Google_Sans'] text-gray-900 mb-2">
+            <h2 className="text-xl font-['Google_Sans'] text-gray-900 mb-4">
               Pipeline Overview
             </h2>
-            <p className="text-gray-600">
-              {pipeline.description} Here's how our AI agents collaborated to build this solution:
-            </p>
+            <div className="space-y-3">
+              {pipeline.components.map((component, index) => (
+                <div key={component.id} className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
+                    {index + 1}
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-gray-700">
+                      <span className="font-medium text-gray-900">{component.name}:</span>{' '}
+                      {component.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,201 @@
+[
+  {
+    "id": "standard_scaler",
+    "name": "Standard Scaler",
+    "type": "preprocessing",
+    "description": "Normalizes numeric features to zero mean and unit variance.",
+    "code_snippet": "from sklearn.preprocessing import StandardScaler",
+    "model_asset": "/models/standard_scaler.glb",
+    "icon": "📊",
+    "suggested_alternatives": ["min_max_scaler", "robust_scaler"],
+    "requirements": {
+      "dependencies": ["scikit-learn>=1.0.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "DataCleanerGPT",
+      "role": "Data Preprocessing Expert",
+      "quote": "Clean data is my jam! Let me handle those messy sensor readings."
+    }
+  },
+  {
+    "id": "min_max_scaler",
+    "name": "Min-Max Scaler",
+    "type": "preprocessing",
+    "description": "Scales values to a 0-1 range. Useful for bounded inputs.",
+    "code_snippet": "from sklearn.preprocessing import MinMaxScaler",
+    "model_asset": "/models/min_max.glb",
+    "icon": "📈",
+    "requirements": {
+      "dependencies": ["scikit-learn>=1.0.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "NormalizerGPT",
+      "role": "Data Scaling Specialist",
+      "quote": "Let me squeeze those values into a nice, bounded range!"
+    }
+  },
+  {
+    "id": "outlier_filter",
+    "name": "Outlier Detection",
+    "type": "preprocessing",
+    "description": "Removes anomalous data points using IQR or z-score methods.",
+    "code_snippet": "df = df[(z_scores < 3).all(axis=1)]",
+    "model_asset": "/models/outlier_filter.glb",
+    "icon": "🚨",
+    "requirements": {
+      "dependencies": ["numpy>=1.20.0", "pandas>=1.3.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "AnomalyHunterGPT",
+      "role": "Outlier Detection Expert",
+      "quote": "I've got a keen eye for data that doesn't belong!"
+    }
+  },
+  {
+    "id": "time_alignment",
+    "name": "Time Alignment",
+    "type": "preprocessing",
+    "description": "Aligns multi-sensor time series to a shared timestamp index.",
+    "code_snippet": "df = df.resample('1H').mean()",
+    "model_asset": "/models/time_align.glb",
+    "icon": "⏱️",
+    "requirements": {
+      "dependencies": ["pandas>=1.3.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "TimeKeeperGPT",
+      "role": "Temporal Alignment Specialist",
+      "quote": "Time waits for no one, but I'll make sure your data stays in sync!"
+    }
+  },
+  {
+    "id": "transformer_model",
+    "name": "Time Series Transformer",
+    "type": "model",
+    "description": "Captures long-term temporal patterns using attention mechanisms.",
+    "code_snippet": "output = self.transformer(x)",
+    "model_asset": "/models/transformer.glb",
+    "icon": "🔁",
+    "requirements": {
+      "dependencies": ["torch>=1.10.0", "transformers>=4.0.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "ModelArchitectGPT",
+      "role": "Neural Architecture Specialist",
+      "quote": "Time series data? Leave it to my transformer architecture!"
+    }
+  },
+  {
+    "id": "json_exporter",
+    "name": "JSON Output Formatter",
+    "type": "postprocessing",
+    "description": "Formats predictions as JSON with timestamps and metadata.",
+    "code_snippet": "json.dumps(predictions)",
+    "model_asset": "/models/json_formatter.glb",
+    "icon": "📤",
+    "requirements": {
+      "dependencies": ["python-json-logger>=2.0.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "OutputOptimizerGPT",
+      "role": "Prediction Refinement Specialist",
+      "quote": "Let me format those predictions for easy integration!"
+    }
+  },
+  {
+    "id": "pca",
+    "name": "PCA",
+    "type": "feature",
+    "description": "Applies Principal Component Analysis for dimensionality reduction.",
+    "code_snippet": "from sklearn.decomposition import PCA; pca = PCA(n_components=10); X = pca.fit_transform(X)",
+    "model_asset": "/models/pca.glb",
+    "icon": "📉",
+    "requirements": {
+      "dependencies": ["scikit-learn>=1.0.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "FeatureEngineerGPT",
+      "role": "Feature Engineering Specialist",
+      "quote": "Let's distill those features down to their essence!"
+    }
+  },
+  {
+    "id": "data_validator",
+    "name": "Data Validator",
+    "type": "transformation",
+    "description": "Validates input data against a predefined schema.",
+    "code_snippet": "jsonschema.validate(data, schema)",
+    "model_asset": "/models/data_validator.glb",
+    "icon": "✅",
+    "requirements": {
+      "dependencies": ["jsonschema>=4.0.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "QualityControlGPT",
+      "role": "Data Quality Guardian",
+      "quote": "Ensuring your data is pristine and ready for analysis!"
+    }
+  },
+  {
+    "id": "model_drift_detector",
+    "name": "Model Drift Detector",
+    "type": "monitoring",
+    "description": "Detects drift in model performance over time.",
+    "code_snippet": "drift_detector.detect(predictions, actuals)",
+    "model_asset": "/models/drift_detector.glb",
+    "icon": "⚙️",
+    "requirements": {
+      "dependencies": ["tensorflow>=2.0.0", "alibi_detect>=0.8.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "PerformanceMonitorGPT",
+      "role": "Model Performance Analyst",
+      "quote": "Keeping a vigilant eye on your model's health and stability."
+    }
+  },
+  {
+    "id": "shap_explainer",
+    "name": "SHAP Explainer",
+    "type": "explainability",
+    "description": "Explains model predictions using SHAP values.",
+    "code_snippet": "shap.summary_plot(shap_values, X)",
+    "model_asset": "/models/shap_explainer.glb",
+    "icon": "💡",
+    "requirements": {
+      "dependencies": ["shap>=0.39.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "InsightfulAnalystGPT",
+      "role": "Model Interpretation Expert",
+      "quote": "Unlocking the secrets behind your model's decisions."
+    }
+  },
+  {
+    "id": "robust_scaler",
+    "name": "Robust Scaler",
+    "type": "preprocessing",
+    "description": "Scales data using statistics that are robust to outliers.",
+    "code_snippet": "from sklearn.preprocessing import RobustScaler; scaler = RobustScaler(); X = scaler.fit_transform(X)",
+    "model_asset": "/models/robust_scaler.glb",
+    "icon": "💪",
+    "requirements": {
+      "dependencies": ["scikit-learn>=1.0.0"],
+      "environments": ["Python 3.7+"]
+    },
+    "agent": {
+      "name": "DataResilienceGPT",
+      "role": "Outlier-Resistant Scaling Specialist",
+      "quote": "Making your data robust against the slings and arrows of outliers!"
+    }
+  }
+] 

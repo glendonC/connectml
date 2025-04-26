@@ -12,7 +12,7 @@ import ReactFlow, {
 } from 'reactflow';
 import { motion } from 'framer-motion';
 import { Pipeline } from '../../../App';
-import { Database, Sparkles, Code, ExternalLink, Package, ChevronDown } from 'lucide-react';
+import { Database, Sparkles, Code, ExternalLink, Package, ChevronDown, GitBranch, ArrowLeftRight, Activity, LineChart } from 'lucide-react';
 import 'reactflow/dist/style.css';
 
 interface FlowViewProps {
@@ -22,6 +22,32 @@ interface FlowViewProps {
 // Custom Node Component
 const CustomNode = ({ data }: { data: any }) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
+
+  const getNodeColor = (type: string) => {
+    switch (type) {
+      case 'preprocessing': return 'bg-blue-100 text-blue-600';
+      case 'model': return 'bg-purple-100 text-purple-600';
+      case 'postprocessing': return 'bg-green-100 text-green-600';
+      case 'feature': return 'bg-orange-100 text-orange-600';
+      case 'transformation': return 'bg-rose-100 text-rose-600';
+      case 'monitoring': return 'bg-cyan-100 text-cyan-600';
+      case 'explainability': return 'bg-yellow-100 text-yellow-600';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  const getNodeIcon = (type: string) => {
+    switch (type) {
+      case 'preprocessing': return <Database className="w-5 h-5" />;
+      case 'model': return <Sparkles className="w-5 h-5" />;
+      case 'postprocessing': return <Code className="w-5 h-5" />;
+      case 'feature': return <GitBranch className="w-5 h-5" />;
+      case 'transformation': return <ArrowLeftRight className="w-5 h-5" />;
+      case 'monitoring': return <Activity className="w-5 h-5" />;
+      case 'explainability': return <LineChart className="w-5 h-5" />;
+      default: return <Code className="w-5 h-5" />;
+    }
+  };
 
   return (
     <motion.div
@@ -36,14 +62,8 @@ const CustomNode = ({ data }: { data: any }) => {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-start gap-4">
-          <div className={`p-2 rounded-lg ${
-            data.type === 'preprocessing' ? 'bg-blue-100 text-blue-600' :
-            data.type === 'model' ? 'bg-purple-100 text-purple-600' :
-            'bg-green-100 text-green-600'
-          }`}>
-            {data.type === 'preprocessing' ? <Database className="w-5 h-5" /> :
-             data.type === 'model' ? <Sparkles className="w-5 h-5" /> :
-             <Code className="w-5 h-5" />}
+          <div className={`p-2 rounded-lg ${getNodeColor(data.type)}`}>
+            {getNodeIcon(data.type)}
           </div>
           <div className="flex-1">
             <h3 className="font-['Google_Sans'] text-gray-900">{data.name}</h3>
@@ -155,12 +175,29 @@ export function FlowView({ pipeline }: FlowViewProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
+  const getNodeColor = (type: string) => {
+    switch (type) {
+      case 'preprocessing': return 'bg-blue-100 text-blue-600';
+      case 'model': return 'bg-purple-100 text-purple-600';
+      case 'postprocessing': return 'bg-green-100 text-green-600';
+      case 'feature': return 'bg-orange-100 text-orange-600';
+      case 'transformation': return 'bg-rose-100 text-rose-600';
+      case 'monitoring': return 'bg-cyan-100 text-cyan-600';
+      case 'explainability': return 'bg-yellow-100 text-yellow-600';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
+
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'preprocessing': return 'bg-blue-400';
-      case 'model': return 'bg-purple-400';
-      case 'postprocessing': return 'bg-green-400';
-      default: return 'bg-gray-400';
+      case 'preprocessing': return 'bg-blue-500';
+      case 'model': return 'bg-purple-500';
+      case 'postprocessing': return 'bg-green-500';
+      case 'feature': return 'bg-orange-500';
+      case 'transformation': return 'bg-rose-500';
+      case 'monitoring': return 'bg-cyan-500';
+      case 'explainability': return 'bg-yellow-500';
+      default: return 'bg-gray-500';
     }
   };
 
@@ -186,13 +223,13 @@ export function FlowView({ pipeline }: FlowViewProps) {
           }}
           maskColor="rgba(243, 244, 246, 0.7)"
         />
-        <Panel position="bottom-center" className="bg-white p-4 rounded-t-xl shadow-lg border border-gray-200">
-          <div className="flex items-center gap-6">
+        <Panel position="bottom-center" className="bg-white rounded-full shadow-sm border border-gray-100 px-8 py-3 mb-6">
+          <div className="flex items-center gap-8">
             {componentTypes.map(type => (
-              <div key={type} className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${getTypeColor(type)}`} />
+              <div key={type} className="flex items-center gap-3">
+                <div className={`w-2.5 h-2.5 rounded-full ${getTypeColor(type)}`} />
                 <span className="text-sm text-gray-600">
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                  {type.toLowerCase()}
                 </span>
               </div>
             ))}

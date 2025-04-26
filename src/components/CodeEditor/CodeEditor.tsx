@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Pipeline } from '../../App';
-import { Code, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { EditorHeader } from './components/EditorHeader';
 import { CodePane } from './components/CodePane';
 import { RecommendationsPanel } from './components/RecommendationsPanel';
 import { useCodeGeneration } from './hooks/useCodeGeneration';
 import { useRefactor } from './hooks/useRefactor';
+import { Pipeline } from '../../App';
 import { RefactorOption } from './types';
 
 interface CodeEditorProps {
@@ -14,62 +13,91 @@ interface CodeEditorProps {
   onClose: () => void;
 }
 
-export function CodeEditor({ pipeline, onClose }: CodeEditorProps) {
+export const CodeEditor: React.FC<CodeEditorProps> = ({ pipeline, onClose }) => {
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const { code, language, framework, theme, setTheme, handleLanguageChange, handleFrameworkChange } = useCodeGeneration(pipeline);
-  const { isRefactoring, handleRefactor } = useRefactor();
+  const [theme, setTheme] = useState<'vs-dark' | 'light'>('vs-dark');
+  const [useAIGeneration, setUseAIGeneration] = useState(false);
+  const [refactorError, setRefactorError] = useState<string | null>(null);
+  
+  const {
+    code,
+    language,
+    framework,
+    isLoading,
+    error,
+    setLanguage,
+    setFramework,
+    setCode,
+  } = useCodeGeneration({
+    pipeline,
+    useAIGeneration,
+  });
+
+  const { isRefactoring, selectedRefactorOption, handleRefactor } = useRefactor();
 
   const handleRefactorCode = async (option: RefactorOption, customPrompt?: string) => {
-    const newCode = await handleRefactor(option, code, customPrompt);
-    // Update code with refactored version
-    // This will be implemented when we connect to the AI backend
-    console.log('Refactored code:', newCode);
+    try {
+      setRefactorError(null);
+      const refactoredCode = await handleRefactor(option, code, customPrompt);
+      setCode(refactoredCode);
+    } catch (error) {
+      console.error('Error refactoring code:', error);
+      setRefactorError('Failed to refactor code. Please try again.');
+    }
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
     >
       <motion.div
         initial={{ scale: 0.95 }}
         animate={{ scale: 1 }}
         exit={{ scale: 0.95 }}
-        className="bg-white rounded-xl shadow-xl w-full max-w-[90vw] h-[90vh] overflow-hidden flex"
+        className="w-full max-w-[90vw] h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden flex flex-col"
       >
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <EditorHeader
-            code={code}
-            language={language}
-            framework={framework}
-            theme={theme}
-            setTheme={setTheme}
-            onLanguageChange={handleLanguageChange}
-            onFrameworkChange={handleFrameworkChange}
-            showRecommendations={showRecommendations}
-            setShowRecommendations={setShowRecommendations}
-            onRefactor={handleRefactorCode}
-            onClose={onClose}
-          />
-
-          <CodePane
-            code={code}
-            language={language}
-            theme={theme}
-            isRefactoring={isRefactoring}
-          />
-        </div>
-
-        {/* Side Panel for Recommendations */}
-        <AnimatePresence>
+        <EditorHeader
+          code={code}
+          language={language}
+          framework={framework}
+          theme={theme}
+          setTheme={setTheme}
+          onLanguageChange={setLanguage}
+          onFrameworkChange={setFramework}
+          showRecommendations={showRecommendations}
+          setShowRecommendations={setShowRecommendations}
+          onRefactor={handleRefactorCode}
+          onClose={onClose}
+          useAIGeneration={useAIGeneration}
+          setUseAIGeneration={setUseAIGeneration}
+          error={error || refactorError}
+        />
+        
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex-1 h-full">
+            <CodePane
+              code={code}
+              language={language}
+              theme={theme}
+              isLoading={isLoading || isRefactoring}
+              isAIGenerated={useAIGeneration || selectedRefactorOption !== null}
+            />
+          </div>
+          
           {showRecommendations && (
-            <RecommendationsPanel pipeline={pipeline} />
+            <div className="w-80 border-l border-gray-200">
+              <RecommendationsPanel
+                code={code}
+                isLoading={isLoading || isRefactoring}
+                onRefactor={handleRefactorCode}
+              />
+            </div>
           )}
-        </AnimatePresence>
+        </div>
       </motion.div>
     </motion.div>
   );
-}
+};

@@ -55,51 +55,56 @@ export function ComponentCatalog({ pipeline, onAddComponents, onClose }: Compone
   };
 
   const handlePreviewConfirm = () => {
-    const newComponents: PipelineComponent[] = selectedComponents.map((component, index) => ({
-      id: component.id,
-      name: component.displayName,
-      description: component.description,
-      type: component.type,
-      requirements: component.requirements,
-      agentReasoning: {
-        agentName: component.agent.name,
-        role: component.agent.role,
-        quote: component.agent.quote,
-        componentTitle: component.displayName,
+    const newComponents: PipelineComponent[] = selectedComponents.map((component, index) => {
+      const mappedType = component.type === 'feature' || component.type === 'transformation' || 
+                        component.type === 'monitoring' || component.type === 'explainability' 
+                        ? 'preprocessing' : component.type;
+      return {
+        id: component.id,
+        name: component.displayName,
         description: component.description,
-        why: `Added to enhance pipeline capabilities with ${component.displayName.toLowerCase()}`,
-        performanceImpact: {
-          accuracy: '+0%',
-          latency: '0ms',
-          reliability: '+0%'
-        }
-      },
-      flowNode: {
-        stepId: component.id,
-        title: component.displayName,
-        nodeType: component.type,
-        position: { 
-          x: (pipeline.components.length + index + 1) * 300, 
-          y: 100 
+        type: mappedType,
+        requirements: component.requirements,
+        agentReasoning: {
+          agentName: component.agent.name,
+          role: component.agent.role,
+          quote: component.agent.quote,
+          componentTitle: component.displayName,
+          description: component.description,
+          why: `Added to enhance pipeline capabilities with ${component.displayName.toLowerCase()}`,
+          performanceImpact: {
+            accuracy: '+0%',
+            latency: '0ms',
+            reliability: '+0%'
+          }
         },
-        agent: component.agent.name,
-        shortSummary: component.description,
-        impactMetric: 'New Component',
-        connections: []
-      },
-      threeDNode: {
-        title: component.displayName,
-        nodeType: component.type,
-        agent: component.agent.name,
-        impact: 'New Component',
-        tooltip: component.description,
-        position3D: { 
-          x: (pipeline.components.length + index + 1) * 6, 
-          y: 0, 
-          z: 0 
+        flowNode: {
+          stepId: component.id,
+          title: component.displayName,
+          nodeType: mappedType,
+          position: { 
+            x: (pipeline.components.length + index + 1) * 300, 
+            y: 100 
+          },
+          agent: component.agent.name,
+          shortSummary: component.description,
+          impactMetric: 'New Component',
+          connections: []
+        },
+        threeDNode: {
+          title: component.displayName,
+          nodeType: mappedType,
+          agent: component.agent.name,
+          impact: 'New Component',
+          tooltip: component.description,
+          position3D: { 
+            x: (pipeline.components.length + index + 1) * 6, 
+            y: 0, 
+            z: 0 
+          }
         }
-      }
-    }));
+      };
+    });
 
     onAddComponents(newComponents);
     setShowPreview(false);
@@ -302,7 +307,13 @@ export function ComponentCatalog({ pipeline, onAddComponents, onClose }: Compone
         {showPreview && (
           <PipelinePreview
             pipeline={pipeline}
-            selectedComponents={selectedComponents}
+            selectedComponents={selectedComponents.map(c => ({
+              ...c,
+              name: c.displayName,
+              type: c.type === 'feature' || c.type === 'transformation' || 
+                    c.type === 'monitoring' || c.type === 'explainability' 
+                    ? 'preprocessing' : c.type
+            }))}
             onClose={() => setShowPreview(false)}
             onConfirm={handlePreviewConfirm}
           />

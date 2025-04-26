@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Pipeline, PipelineComponent } from '../App';
-import { X, ArrowRight, Check, Database, Sparkles, Code, Package, AlertTriangle } from 'lucide-react';
+import { X, ArrowRight, Check, Database, Sparkles, Code, Package, AlertTriangle, Wand2 } from 'lucide-react';
 
 interface PipelinePreviewProps {
   pipeline: Pipeline;
@@ -14,6 +14,9 @@ interface ValidationResult {
   isValid: boolean;
   warnings: string[];
   errors: string[];
+  message?: string;
+  suggestedOrder?: PipelineComponent[] | null;
+  restructuringNotes?: string[];
 }
 
 const getIconByType = (type: string) => {
@@ -30,11 +33,62 @@ const getTypeColor = (type: string) => {
     case 'preprocessing': return 'bg-blue-100 text-blue-600';
     case 'model': return 'bg-purple-100 text-purple-600';
     case 'postprocessing': return 'bg-green-100 text-green-600';
+    case 'feature': return 'bg-orange-100 text-orange-600';
+    case 'transformation': return 'bg-cyan-100 text-cyan-600';
+    case 'monitoring': return 'bg-yellow-100 text-yellow-600';
+    case 'explainability': return 'bg-rose-100 text-rose-600';
     default: return 'bg-gray-100 text-gray-600';
   }
 };
 
 export function PipelinePreview({ pipeline, selectedComponents, onClose, onConfirm }: PipelinePreviewProps) {
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidationResult>({
+    isValid: false,
+    warnings: [],
+    errors: [],
+  });
+  const [components, setComponents] = useState([...pipeline.components, ...selectedComponents]);
+
+  const validatePipeline = async () => {
+    setIsValidating(true);
+    try {
+      const response = await fetch('http://localhost:8000/validate-pipeline', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          current_components: pipeline.components,
+          new_components: selectedComponents,
+        }),
+      });
+
+      const data = await response.json();
+      
+      setValidationResult({
+        isValid: data.valid,
+        warnings: [],
+        errors: data.valid ? [] : [data.message],
+        message: data.message,
+        suggestedOrder: data.suggested_order,
+        restructuringNotes: data.restructuring_notes,
+      });
+
+      if (data.suggested_order) {
+        setComponents(data.suggested_order);
+      }
+    } catch (error) {
+      setValidationResult({
+        isValid: false,
+        warnings: [],
+        errors: ['Failed to validate pipeline'],
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   // Validation Rules
   const validation = useMemo((): ValidationResult => {
     const result: ValidationResult = {
@@ -121,20 +175,26 @@ export function PipelinePreview({ pipeline, selectedComponents, onClose, onConfi
         </div>
 
         {/* Validation Messages */}
-        {(validation.errors.length > 0 || validation.warnings.length > 0) && (
+        {(validationResult.errors.length > 0 || validationResult.warnings.length > 0 || validationResult.message) && (
           <div className="p-4 bg-gray-50 border-b border-gray-200">
-            {validation.errors.map((error, index) => (
+            {validationResult.errors.map((error, index) => (
               <div key={`error-${index}`} className="flex items-center gap-2 text-red-600 mb-2">
                 <AlertTriangle className="w-4 h-4" />
                 <span className="text-sm">{error}</span>
               </div>
             ))}
-            {validation.warnings.map((warning, index) => (
+            {validationResult.warnings.map((warning, index) => (
               <div key={`warning-${index}`} className="flex items-center gap-2 text-yellow-600">
                 <AlertTriangle className="w-4 h-4" />
                 <span className="text-sm">{warning}</span>
               </div>
             ))}
+            {validationResult.message && !validationResult.errors.includes(validationResult.message) && (
+              <div className="flex items-center gap-2 text-blue-600">
+                <Check className="w-4 h-4" />
+                <span className="text-sm">{validationResult.message}</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -193,7 +253,7 @@ export function PipelinePreview({ pipeline, selectedComponents, onClose, onConfi
             <div>
               <h3 className="text-sm font-medium text-gray-700 mb-4">Updated Pipeline</h3>
               <div className="flex items-center gap-3">
-                {[...pipeline.components, ...selectedComponents].map((component, index) => (
+                {components.map((component, index) => (
                   <React.Fragment key={component.id}>
                     <motion.div
                       initial={index >= pipeline.components.length ? { opacity: 0, scale: 0.9 } : false}
@@ -215,7 +275,7 @@ export function PipelinePreview({ pipeline, selectedComponents, onClose, onConfi
                             {getIconByType(component.type)}
                           </div>
                           <span className="font-['Google_Sans'] text-gray-900">
-                            {index >= pipeline.components.length ? component.displayName : component.name}
+                            {index >= pipeline.components.length ? component.name : component.name}
                           </span>
                         </div>
                       </div>
@@ -258,10 +318,22 @@ export function PipelinePreview({ pipeline, selectedComponents, onClose, onConfi
               Cancel
             </button>
             <button
-              onClick={onConfirm}
-              disabled={!validation.isValid}
+              onClick={validatePipeline}
+              disabled={isValidating}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                validation.isValid
+                isValidating
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
+            >
+              <Wand2 className="w-4 h-4" />
+              {isValidating ? 'Validating...' : 'Validate Pipeline'}
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={!validationResult.isValid}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                validationResult.isValid
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}

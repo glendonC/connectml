@@ -1,15 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Pipeline } from '../../../App';
-import { Zap } from 'lucide-react';
+import { Zap, Wand2 } from 'lucide-react';
 import { useRecommendations } from '../hooks/useRecommendations';
+import { RefactorOption } from '../types';
 
 interface RecommendationsPanelProps {
-  pipeline: Pipeline;
+  code: string;
+  isLoading: boolean;
+  onRefactor: (option: RefactorOption, customPrompt?: string) => void;
 }
 
-export function RecommendationsPanel({ pipeline }: RecommendationsPanelProps) {
-  const recommendations = useRecommendations(pipeline);
+export function RecommendationsPanel({ code, isLoading, onRefactor }: RecommendationsPanelProps) {
+  const recommendations = useRecommendations(code);
 
   return (
     <motion.div
@@ -19,6 +21,59 @@ export function RecommendationsPanel({ pipeline }: RecommendationsPanelProps) {
       className="border-l border-gray-200 overflow-y-auto"
     >
       <div className="p-6 space-y-6">
+        {/* Refactoring Options */}
+        <div>
+          <h3 className="text-sm font-medium text-gray-900 mb-2">Code Improvements</h3>
+          <div className="space-y-3">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => onRefactor('simplify')}
+                  className="w-full bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-blue-200 transition-colors text-left"
+                >
+                  <div className="flex items-start gap-3">
+                    <Wand2 className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <div className="font-medium text-gray-900">Simplify Code</div>
+                      <div className="text-sm text-gray-600">Make the code more concise and readable</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => onRefactor('addComments')}
+                  className="w-full bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-blue-200 transition-colors text-left"
+                >
+                  <div className="flex items-start gap-3">
+                    <Wand2 className="w-5 h-5 text-purple-600" />
+                    <div>
+                      <div className="font-medium text-gray-900">Add Comments</div>
+                      <div className="text-sm text-gray-600">Explain the code with detailed comments</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => onRefactor('optimize')}
+                  className="w-full bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-blue-200 transition-colors text-left"
+                >
+                  <div className="flex items-start gap-3">
+                    <Zap className="w-5 h-5 text-yellow-500" />
+                    <div>
+                      <div className="font-medium text-gray-900">Optimize Performance</div>
+                      <div className="text-sm text-gray-600">Improve code efficiency and speed</div>
+                    </div>
+                  </div>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
         {/* Training Requirements */}
         <div>
           <h3 className="text-sm font-medium text-gray-900 mb-2">Training Requirements</h3>

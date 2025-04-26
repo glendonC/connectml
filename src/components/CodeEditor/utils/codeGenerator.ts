@@ -1,141 +1,164 @@
-import { Pipeline } from '../../../App';
+import { Pipeline, PipelineComponent } from '../../../App';
 import { Language, Framework } from '../types';
+import { tensorflowImports, generateModelClass as generateTensorflowModel, generateTrainingLoop as generateTensorflowTraining } from './templates/python/tensorflow';
+import { sklearnImports, generateModelClass as generateSklearnModel, generateTrainingLoop as generateSklearnTraining } from './templates/python/sklearn';
+import { pytorchImports, generateModelClass as generatePytorchModel, generateTrainingLoop as generatePytorchTraining } from './templates/python/pytorch';
 
-export function generateCode(pipeline: Pipeline, language: Language, framework: Framework): string {
+export const generateCode = (pipeline: Pipeline, language: Language, framework: Framework): string => {
   if (language === 'json') {
     return JSON.stringify(pipeline, null, 2);
   }
 
-  const imports = {
-    pytorch: [
+  if (language === 'python') {
+    const imports = [
+      'import logging',
       'import numpy as np',
       'import pandas as pd',
-      'from sklearn.preprocessing import StandardScaler',
-      'import torch',
-      'import torch.nn as nn',
-      ''
-    ],
-    tensorflow: [
-      'import numpy as np',
-      'import pandas as pd',
-      'from sklearn.preprocessing import StandardScaler',
-      'import tensorflow as tf',
-      'from tensorflow.keras import layers, Model',
-      ''
-    ],
-    sklearn: [
-      'import numpy as np',
-      'import pandas as pd',
-      'from sklearn.preprocessing import StandardScaler',
-      'from sklearn.pipeline import Pipeline',
-      'from sklearn.base import BaseEstimator, TransformerMixin',
-      ''
-    ]
-  };
+      'from typing import Dict, List, Tuple, Any',
+    ];
 
-  const components = pipeline.components.map(component => {
-    switch (component.type) {
-      case 'preprocessing':
-        return `
-class ${component.name.replace(/\s+/g, '')}:
-    def __init__(self):
-        self.scaler = StandardScaler()
-        
-    def fit_transform(self, X):
-        # ${component.description}
-        return self.scaler.fit_transform(X)
-        
-    def transform(self, X):
-        return self.scaler.transform(X)`;
-      
-      case 'model':
-        if (framework === 'pytorch') {
-          return `
-class ${component.name.replace(/\s+/g, '')}(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.layers = nn.Sequential(
-            nn.Linear(input_size, 128),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Linear(64, output_size)
-        )
-        
-    def forward(self, x):
-        # ${component.description}
-        return self.layers(x)`;
-        }
-        
-        if (framework === 'tensorflow') {
-          return `
-class ${component.name.replace(/\s+/g, '')}(Model):
-    def __init__(self):
-        super().__init__()
-        self.layers_list = [
-            layers.Dense(128, activation='relu'),
-            layers.Dropout(0.2),
-            layers.Dense(64, activation='relu'),
-            layers.Dense(output_size)
-        ]
-        
-    def call(self, x):
-        # ${component.description}
-        for layer in self.layers_list:
-            x = layer(x)
-        return x`;
-        }
-        
-        return `
-class ${component.name.replace(/\s+/g, '')}(BaseEstimator):
-    def __init__(self):
-        self.model = Pipeline([
-            ('dense1', Dense(128)),
-            ('relu1', ReLU()),
-            ('dropout', Dropout(0.2)),
-            ('dense2', Dense(64)),
-            ('relu2', ReLU()),
-            ('output', Dense(output_size))
-        ])
-        
-    def fit(self, X, y):
-        # ${component.description}
-        return self.model.fit(X, y)
-        
-    def predict(self, X):
-        return self.model.predict(X)`;
-      
-      case 'postprocessing':
-        return `
-class ${component.name.replace(/\s+/g, '')}:
-    def __init__(self):
-        pass
-        
-    def process(self, predictions):
-        # ${component.description}
-        return predictions`;
-      
+    const setupLogging = `
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+`;
+
+    let frameworkImports: string[] = [];
+    let modelGenerator: (component: PipelineComponent) => string;
+    let trainingGenerator: () => string;
+
+    // Select framework-specific templates
+    switch (framework) {
+      case 'pytorch':
+        frameworkImports = pytorchImports;
+        modelGenerator = generatePytorchModel;
+        trainingGenerator = generatePytorchTraining;
+        break;
+      case 'tensorflow':
+        frameworkImports = tensorflowImports;
+        modelGenerator = generateTensorflowModel;
+        trainingGenerator = generateTensorflowTraining;
+        break;
+      case 'sklearn':
+        frameworkImports = sklearnImports;
+        modelGenerator = generateSklearnModel;
+        trainingGenerator = generateSklearnTraining;
+        break;
       default:
-        return '';
+        throw new Error(`Unsupported framework: ${framework}`);
     }
-  });
 
-  const pipelineClass = `
-class ${pipeline.name.replace(/\s+/g, '')}:
+    // Generate code for each component
+    const components = pipeline.components.map(component => {
+      switch (component.type) {
+        case 'preprocessing':
+          return `
+class ${component.name.replace(/\s+/g, '')}:
+    """${component.description}"""
+    
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+    
+    def process(self, data: Any) -> Any:
+        """Process the input data.
+        
+        Args:
+            data: Input data to process
+            
+        Returns:
+            Processed data
+        """
+        self.logger.info("Processing data...")
+        # TODO: Implement preprocessing logic
+        return data
+`;
+        case 'model':
+          return modelGenerator(component);
+        case 'postprocessing':
+          return `
+class ${component.name.replace(/\s+/g, '')}:
+    """${component.description}"""
+    
+    def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+    
+    def process(self, predictions: Any) -> Any:
+        """Process model predictions.
+        
+        Args:
+            predictions: Raw model predictions
+            
+        Returns:
+            Processed predictions
+        """
+        self.logger.info("Post-processing predictions...")
+        # TODO: Implement post-processing logic
+        return predictions
+`;
+        default:
+          return '';
+      }
+    }).join('\n\n');
+
+    // Generate main pipeline class
+    const pipelineClass = `
+class MLPipeline:
+    """Main pipeline class that orchestrates the ML workflow."""
+    
+    def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
         ${pipeline.components.map(c => 
           `self.${c.name.toLowerCase().replace(/\s+/g, '_')} = ${c.name.replace(/\s+/g, '')}()`
         ).join('\n        ')}
+    
+    def run(self, data: Any) -> Any:
+        """Run the complete pipeline.
         
-    def predict(self, X):
-        # Process input through the pipeline
-        ${pipeline.components.map((c, i) => {
-          if (i === 0) return `x = self.${c.name.toLowerCase().replace(/\s+/g, '_')}.fit_transform(X)`;
-          if (c.type === 'model') return `x = self.${c.name.toLowerCase().replace(/\s+/g, '_')}(x)`;
-          return `x = self.${c.name.toLowerCase().replace(/\s+/g, '_')}.process(x)`;
+        Args:
+            data: Input data
+            
+        Returns:
+            Processed results
+        """
+        self.logger.info("Running pipeline...")
+        
+        # Process data through each component
+        result = data
+        ${pipeline.components.map(c => {
+          const varName = c.name.toLowerCase().replace(/\s+/g, '_');
+          if (c.type === 'model') {
+            return `result = self.${varName}.predict(result)`;
+          }
+          return `result = self.${varName}.process(result)`;
         }).join('\n        ')}
-        return x`;
+        
+        return result
 
-  return [...(imports[framework] || []), ...components, pipelineClass].join('\n');
-}
+if __name__ == "__main__":
+    # Example usage
+    pipeline = MLPipeline()
+    
+    # Load and prepare your data here
+    data = None  # Replace with actual data loading
+    
+    # Run the pipeline
+    result = pipeline.run(data)
+    print("Pipeline execution completed.")
+`;
+
+    // Combine all code sections
+    return [
+      ...imports,
+      ...frameworkImports,
+      setupLogging,
+      components,
+      trainingGenerator(),
+      pipelineClass
+    ].join('\n\n');
+  }
+
+  throw new Error(`Unsupported language: ${language}`);
+};

@@ -1,6 +1,18 @@
 import { useState } from 'react';
 import { RefactorOption } from '../types';
 
+interface RefactorRequest {
+  code: string;
+  option: RefactorOption;
+  customPrompt?: string;
+}
+
+const REFACTOR_PROMPTS = {
+  simplify: "Simplify this code by removing unnecessary complexity while maintaining its functionality. Focus on making it more concise and easier to understand.",
+  addComments: "Add detailed, professional comments to this code explaining what each section does. Include docstrings for functions and classes.",
+  optimize: "Optimize this code for readability by improving variable names, function names, and code structure. Ensure it follows best practices and style guidelines.",
+};
+
 export function useRefactor() {
   const [isRefactoring, setIsRefactoring] = useState(false);
   const [selectedRefactorOption, setSelectedRefactorOption] = useState<RefactorOption | null>(null);
@@ -8,29 +20,48 @@ export function useRefactor() {
   const handleRefactor = async (option: RefactorOption, code: string, customPrompt?: string) => {
     setIsRefactoring(true);
     setSelectedRefactorOption(option);
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    let newCode = code;
-    if (option === 'custom') {
-      newCode = code.replace(/\n/g, '\n// ' + customPrompt + '\n');
-    } else {
-      const mockChanges = {
-        simplify: code.replace(/\n\n+/g, '\n\n'),
-        addComments: code.replace(
-          /(class|def)\s+(\w+)/g, 
-          '\n# Description for $2\n$1 $2'
-        ),
-        optimize: code.replace(/(\s{2,})/g, '  ')
-      };
-      
-      newCode = mockChanges[option];
+
+    try {
+      const prompt = option === 'custom' 
+        ? customPrompt 
+        : REFACTOR_PROMPTS[option];
+
+      if (!prompt) {
+        throw new Error('Invalid refactor option');
+      }
+
+      const response = await fetch('http://localhost:8000/refactor-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          prompt,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+        throw new Error(errorData.detail || 'Failed to refactor code');
+      }
+
+      const data = await response.json();
+      if (!data.refactored_code) {
+        throw new Error('No refactored code received from server');
+      }
+
+      return data.refactored_code;
+    } catch (error) {
+      console.error('Error in refactoring:', error);
+      throw error;
+    } finally {
+      // Add a small delay before removing loading state to ensure animation is visible
+      setTimeout(() => {
+        setIsRefactoring(false);
+        setSelectedRefactorOption(null);
+      }, 500);
     }
-    
-    setIsRefactoring(false);
-    setSelectedRefactorOption(null);
-    
-    return newCode;
   };
 
   return {

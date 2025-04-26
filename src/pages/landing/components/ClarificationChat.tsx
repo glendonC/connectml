@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Send } from 'lucide-react';
+import { Bot, Send, AlertCircle, Sparkles } from 'lucide-react';
 import { Domain } from '../../../App';
-import { ClarificationQuestion } from '../types';
+import { ClarificationQuestion } from '../hooks/useClarification';
 
 interface ClarificationChatProps {
   show: boolean;
@@ -13,6 +13,71 @@ interface ClarificationChatProps {
   clarificationAnswers: Record<string, string>;
   onAnswerSubmit: (questionId: string, answer: string) => void;
   onNextQuestion: () => void;
+  context: string;
+  totalQuestions: number;
+  error: string | null;
+}
+
+function LoadingQuestions() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="mt-4 bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
+    >
+      <div className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-blue-100 rounded-xl">
+            <Sparkles className="w-5 h-5 text-blue-600" />
+          </div>
+          <div className="flex-1 space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-block bg-blue-50 rounded-2xl rounded-tl-none px-4 py-2"
+            >
+              <p className="text-gray-900">Generating clarifying questions...</p>
+            </motion.div>
+            
+            {/* Placeholder Question Blocks */}
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.2 }}
+                  className="h-12 bg-gray-100 rounded-xl animate-pulse"
+                  style={{ width: `${85 - (i * 15)}%` }}
+                />
+              ))}
+            </div>
+
+            {/* Animated Dots */}
+            <div className="flex gap-1">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.3, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    delay: i * 0.2
+                  }}
+                  className="w-2 h-2 bg-blue-400 rounded-full"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
 }
 
 export function ClarificationChat({
@@ -23,9 +88,33 @@ export function ClarificationChat({
   currentQuestionIndex,
   clarificationAnswers,
   onAnswerSubmit,
-  onNextQuestion
+  onNextQuestion,
+  context,
+  totalQuestions,
+  error
 }: ClarificationChatProps) {
-  if (!show || !currentQuestion || !selectedDomain) return null;
+  if (!show || !selectedDomain) return null;
+
+  // Show loading animation when there are no questions yet and no error
+  if (!currentQuestion && !error && isTyping) {
+    return <LoadingQuestions />;
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        className="mt-4 bg-red-50 rounded-2xl shadow-lg border border-red-200 p-4"
+      >
+        <div className="flex items-center gap-2 text-red-600">
+          <AlertCircle className="w-5 h-5" />
+          <p>{error}</p>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -36,51 +125,73 @@ export function ClarificationChat({
       className="mt-4 bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
     >
       <div className="p-4">
+        {/* Context Message */}
+        {context && (
+          <div className="flex items-start gap-3 mb-4">
+            <div className="p-2 bg-purple-100 rounded-xl">
+              <Bot className="w-5 h-5 text-purple-600" />
+            </div>
+            <div className="flex-1">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-block bg-purple-50 rounded-2xl rounded-tl-none px-4 py-2"
+              >
+                <p className="text-gray-900">{context}</p>
+              </motion.div>
+            </div>
+          </div>
+        )}
+
         {/* Assistant Message */}
-        <div className="flex items-start gap-3 mb-4">
-          <div className="p-2 bg-blue-100 rounded-xl">
-            <Bot className="w-5 h-5 text-blue-600" />
+        {currentQuestion && (
+          <div className="flex items-start gap-3 mb-4">
+            <div className="p-2 bg-blue-100 rounded-xl">
+              <Bot className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-block bg-blue-50 rounded-2xl rounded-tl-none px-4 py-2"
+              >
+                <p className="text-gray-900">{currentQuestion.question}</p>
+              </motion.div>
+              {isTyping && <TypingIndicator />}
+            </div>
           </div>
-          <div className="flex-1">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-block bg-blue-50 rounded-2xl rounded-tl-none px-4 py-2"
-            >
-              <p className="text-gray-900">{currentQuestion.question}</p>
-            </motion.div>
-            {isTyping && <TypingIndicator />}
-          </div>
-        </div>
+        )}
 
         {/* User Input Area */}
-        <div className="pl-12">
-          {currentQuestion.type === 'select' && currentQuestion.options && (
-            <SelectOptions
-              options={currentQuestion.options}
-              selectedAnswer={clarificationAnswers[currentQuestion.id]}
-              onSelect={(answer) => {
-                onAnswerSubmit(currentQuestion.id, answer);
-                onNextQuestion();
-              }}
-            />
-          )}
+        {currentQuestion && (
+          <div className="pl-12">
+            {currentQuestion.type === 'select' && currentQuestion.options && (
+              <SelectOptions
+                options={currentQuestion.options}
+                selectedAnswer={clarificationAnswers[currentQuestion.id]}
+                onSelect={(answer) => {
+                  onAnswerSubmit(currentQuestion.id, answer);
+                  onNextQuestion();
+                }}
+              />
+            )}
 
-          {(currentQuestion.type === 'text' || currentQuestion.type === 'number') && (
-            <TextInput
-              type={currentQuestion.type}
-              placeholder={currentQuestion.placeholder}
-              value={clarificationAnswers[currentQuestion.id] || ''}
-              onChange={(value) => onAnswerSubmit(currentQuestion.id, value)}
-              onSubmit={onNextQuestion}
-            />
-          )}
-        </div>
+            {(currentQuestion.type === 'text' || currentQuestion.type === 'number') && (
+              <TextInput
+                type={currentQuestion.type}
+                placeholder={currentQuestion.placeholder}
+                value={clarificationAnswers[currentQuestion.id] || ''}
+                onChange={(value) => onAnswerSubmit(currentQuestion.id, value)}
+                onSubmit={onNextQuestion}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <ProgressIndicator
         currentIndex={currentQuestionIndex}
-        totalQuestions={clarificationQuestions[selectedDomain].length}
+        totalQuestions={totalQuestions}
       />
     </motion.div>
   );
