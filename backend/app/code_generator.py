@@ -4,9 +4,17 @@ from .openai_utils import get_openai_client
 from fastapi import HTTPException
 from openai import AsyncOpenAI
 import os
+from dotenv import load_dotenv
+import httpx
 
-# Initialize AsyncOpenAI client
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Load environment variables
+load_dotenv()
+
+# Initialize OpenAI client
+client = AsyncOpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    http_client=httpx.AsyncClient()  # Initialize without proxies
+)
 
 async def refactor_code(code: str, prompt: str) -> str:
     """

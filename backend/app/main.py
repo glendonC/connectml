@@ -5,6 +5,7 @@ import json
 import os
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
+import httpx
 from typing import Optional, Dict, Any
 
 from .pipeline_generator import (
@@ -15,6 +16,7 @@ from .pipeline_generator import (
     generate_pipeline,
     generate_clarification_questions
 )
+from .api.models import SearchStep, PipelineRequest
 from .code_generator import generate_code, refactor_code
 
 # Load environment variables
@@ -33,7 +35,10 @@ app.add_middleware(
 )
 
 # Initialize OpenAI client
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = AsyncOpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    http_client=httpx.AsyncClient()  # Initialize without proxies
+)
 
 # Load component catalog
 def load_component_catalog() -> list[Component]:
@@ -43,16 +48,9 @@ def load_component_catalog() -> list[Component]:
         catalog_data = json.load(f)
     return [Component(**component) for component in catalog_data]
 
-class PipelineRequest(BaseModel):
-    prompt: str
-    clarification_answers: Optional[Dict[str, str]] = None
-
 class ClarificationRequest(BaseModel):
     prompt: str
     domain: str
-
-class GeneratePipelineRequest(BaseModel):
-    prompt: str
 
 class GenerateCodeRequest(BaseModel):
     pipeline: Dict[str, Any]
@@ -93,6 +91,7 @@ async def create_pipeline(request: PipelineRequest) -> PipelineResponse:
             user_prompt=request.prompt,
             component_catalog=catalog,
             client=client,
+            mode=request.mode,
             clarification_answers=request.clarification_answers
         )
         
@@ -110,14 +109,6 @@ async def get_components():
         return catalog
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load component catalog: {str(e)}")
-
-@app.post("/generate-pipeline")
-async def handle_generate_pipeline(request: GeneratePipelineRequest):
-    try:
-        pipeline = await generate_pipeline(request.prompt)
-        return pipeline
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/generate-code")
 async def generate_code_endpoint(request: GenerateCodeRequest):
