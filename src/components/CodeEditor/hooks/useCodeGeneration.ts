@@ -6,6 +6,7 @@ import { Language, Framework, UseCodeGenerationProps, UseCodeGenerationReturn } 
 export function useCodeGeneration({
   pipeline,
   useAIGeneration,
+  dataset,
 }: UseCodeGenerationProps): UseCodeGenerationReturn {
   const [language, setLanguage] = useState<Language>('python');
   const [framework, setFramework] = useState<Framework>('pytorch');
@@ -17,14 +18,14 @@ export function useCodeGeneration({
   useEffect(() => {
     if (pipeline) {
       try {
-        const templateCode = generateCode(pipeline, language, framework);
+        const templateCode = generateCode(pipeline, language, framework, dataset);
         setCode(templateCode);
       } catch (err) {
         console.error('Error generating template code:', err);
         setError('Failed to generate template code');
       }
     }
-  }, [pipeline, language, framework]);
+  }, [pipeline, language, framework, dataset]);
 
   // Handle AI generation when the toggle is switched on
   useEffect(() => {
@@ -43,6 +44,7 @@ export function useCodeGeneration({
             pipeline, 
             language, 
             framework,
+            dataset,
           }),
         });
 
@@ -59,7 +61,7 @@ export function useCodeGeneration({
         
         // Fallback to template-based generation
         try {
-          const templateCode = generateCode(pipeline, language, framework);
+          const templateCode = generateCode(pipeline, language, framework, dataset);
           setCode(templateCode);
           setError('AI generation failed. Using template-based generation instead.');
         } catch (fallbackErr) {
@@ -76,7 +78,7 @@ export function useCodeGeneration({
     if (useAIGeneration) {
       generateAICode();
     }
-  }, [useAIGeneration, pipeline, language, framework]);
+  }, [useAIGeneration, pipeline, language, framework, dataset]);
 
   return {
     code,

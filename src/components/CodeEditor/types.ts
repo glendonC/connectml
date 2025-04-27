@@ -5,6 +5,23 @@ export type RefactorOption = 'simplify' | 'addComments' | 'optimize' | 'custom';
 export interface UseCodeGenerationProps {
   pipeline: any;
   useAIGeneration: boolean;
+  problemStatement?: string;
+  dataset?: {
+    name: string;
+    type: string;
+    size: number;
+    columns?: string[];
+    sample?: any[];
+    targetColumn?: string;
+    problemType?: 'classification' | 'regression' | 'clustering' | 'other';
+    dataCharacteristics?: {
+      hasMissingValues?: boolean;
+      hasCategoricalFeatures?: boolean;
+      hasNumericalFeatures?: boolean;
+      hasTextFeatures?: boolean;
+      hasImageFeatures?: boolean;
+    };
+  };
 }
 
 export interface UseCodeGenerationReturn {

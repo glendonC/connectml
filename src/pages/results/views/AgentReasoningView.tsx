@@ -252,7 +252,7 @@ const AgentCard = ({ component, index, pipeline }: AgentCardProps) => {
 
 export function AgentReasoningView({ pipeline }: AgentReasoningViewProps) {
   return (
-    <div className="max-w-4xl mx-auto px-4 pt-8 pb-12">
+    <div className="max-w-4xl mx-auto px-4 pt-16 pb-12">
       {/* Agent Cards */}
       <div className="space-y-8">
         {pipeline.components.map((component, index) => (

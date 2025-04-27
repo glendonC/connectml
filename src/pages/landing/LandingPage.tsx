@@ -7,7 +7,6 @@ import { SearchBar, AIMode } from './components/SearchBar';
 import { DomainPills, domains } from './components/DomainPills';
 import { ClarificationChat } from './components/ClarificationChat';
 import { useClarification } from './hooks/useClarification';
-import { FileUploadZone } from './components/FileUploadZone';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, FileText, X, AlertCircle } from 'lucide-react';
 
